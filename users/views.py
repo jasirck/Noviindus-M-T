@@ -61,8 +61,6 @@ class UserListView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
-        user = request.user
-        print(user)
         queryset = CustomUser.objects.all()
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
