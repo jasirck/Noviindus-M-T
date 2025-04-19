@@ -39,7 +39,9 @@ class ObtainTokenPairView(APIView):
 
 
 class UserCreateView(APIView):
-    permission_classes = [permissions.AllowAny]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsSuperAdmin]
+
 
     def post(self, request):
     # Only SUPERADMIN can assign roles
