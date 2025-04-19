@@ -14,7 +14,7 @@ User = get_user_model()
 
 class IsSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        print(request.user.is_superuser)
+        print("is_superuser",request.user.is_superuser)
         return request.user.is_authenticated and request.user.is_superuser
 
 
@@ -32,6 +32,7 @@ class ObtainTokenPairView(APIView):
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "role": user.role,
+                "is_superuser": user.is_superuser
             }, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -55,18 +56,12 @@ class UserCreateView(APIView):
 
 class UserListView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperAdmin]
 
     def get(self, request):
         user = request.user
         print(user)
-        if user.role == 'SUPERADMIN':
-            queryset = CustomUser.objects.all()
-        elif user.role == 'ADMIN':
-            queryset = CustomUser.objects.filter(role='USER')
-        else:
-            return Response({"detail": "You are not authorized to view this list."}, status=status.HTTP_403_FORBIDDEN)
-
+        queryset = CustomUser.objects.all()
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -76,7 +71,7 @@ class UserDeleteView(APIView):
 
     def delete(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        if user.role == 'SUPERADMIN':
+        if user.role == 'SUPERADMIN' or user.is_superuser:
             return Response({"detail": "Cannot delete a SuperAdmin."}, status=status.HTTP_403_FORBIDDEN)
         user.delete()
         return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
