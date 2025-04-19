@@ -1,3 +1,95 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer
+from django.shortcuts import get_object_or_404
+from .models import CustomUser
 
-# Create your views here.
+User = get_user_model()
+
+
+class IsSuperAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        print(request.user.is_superuser)
+        return request.user.is_authenticated and request.user.is_superuser
+
+
+
+class ObtainTokenPairView(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "role": user.role,
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserCreateView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+    # Only SUPERADMIN can assign roles
+        if request.user.is_authenticated and (request.user.role != 'SUPERADMIN' or request.user.is_superuser):
+            return Response({"detail": "You are not allowed to assign roles."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UserListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        print(user)
+        if user.role == 'SUPERADMIN':
+            queryset = CustomUser.objects.all()
+        elif user.role == 'ADMIN':
+            queryset = CustomUser.objects.filter(role='USER')
+        else:
+            return Response({"detail": "You are not authorized to view this list."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class UserDeleteView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsSuperAdmin]
+
+    def delete(self, request, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+        if user.role == 'SUPERADMIN':
+            return Response({"detail": "Cannot delete a SuperAdmin."}, status=status.HTTP_403_FORBIDDEN)
+        user.delete()
+        return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserUpdateView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsSuperAdmin]
+
+    def put(self, request, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
