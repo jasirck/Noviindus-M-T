@@ -3,7 +3,6 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
-        ('SUPERADMIN', 'SuperAdmin'),
         ('ADMIN', 'Admin'),
         ('USER', 'User'),
     )

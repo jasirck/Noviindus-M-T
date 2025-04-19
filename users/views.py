@@ -45,7 +45,7 @@ class UserCreateView(APIView):
 
     def post(self, request):
     # Only SUPERADMIN can assign roles
-        if request.user.is_authenticated and (request.user.role != 'SUPERADMIN' or request.user.is_superuser):
+        if request.user.is_authenticated and  request.user.is_superuser:
             return Response({"detail": "You are not allowed to assign roles."}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = UserSerializer(data=request.data)
@@ -71,7 +71,7 @@ class UserDeleteView(APIView):
 
     def delete(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        if user.role == 'SUPERADMIN' or user.is_superuser:
+        if  user.is_superuser:
             return Response({"detail": "Cannot delete a SuperAdmin."}, status=status.HTTP_403_FORBIDDEN)
         user.delete()
         return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
