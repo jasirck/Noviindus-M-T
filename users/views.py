@@ -1,13 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model,login
+from django.shortcuts import render, redirect
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
 from .serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 from .models import CustomUser
+from django.contrib import messages
+
 
 User = get_user_model()
 
@@ -17,6 +21,27 @@ class IsSuperAdmin(permissions.BasePermission):
         print("is_superuser",request.user.is_superuser)
         return request.user.is_authenticated and request.user.is_superuser
 
+
+
+def custom_login(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        user = get_object_or_404(CustomUser, username=username)
+        if user is not None:
+            login(request, user)
+            print('user',user,'role',user.role,'is_superuser',user.is_superuser)
+            # Redirect based on role
+            if user.is_superuser:
+                return redirect("superadmin-dashboard")
+            elif user.role == "ADMIN":
+                return redirect("admin-dashboard")
+            else:
+                return redirect("user-dashboard")
+        else:
+            messages.error(request, "Invalid credentials")
+    return render(request, "login.html")
 
 
 class ObtainTokenPairView(APIView):

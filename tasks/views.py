@@ -7,6 +7,10 @@ from .serializers import UserSerializer, TaskSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import TaskForm
+
 
 
 class IsAdmin(permissions.BasePermission):
@@ -133,3 +137,54 @@ class UserTaskDetailAPIView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@login_required
+def superadmin_dashboard(request):
+    return render(request, "dashboard_superadmin.html")
+
+@login_required
+def admin_dashboard(request):
+    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+        return render(request, "not_authorized.html")
+
+    status_filter = request.GET.get('status')
+    if status_filter:
+        tasks = Task.objects.filter(status=status_filter)
+    else:
+        tasks = Task.objects.all()
+
+    form = TaskForm()
+
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("admin-dashboard")
+
+    return render(request, "dashboard_admin.html", {
+        "tasks": tasks,
+        "form": form
+    })
+
+@login_required
+def user_dashboard(request):
+    return render(request, "dashboard_user.html")
+
+
+
+@login_required
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    form = TaskForm(request.POST or None, instance=task)
+    if form.is_valid():
+        form.save()
+        return redirect("admin-dashboard")
+    return render(request, "edit_task.html", {"form": form, "task": task})
+
+@login_required
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    task.delete()
+    return redirect("admin-dashboard")

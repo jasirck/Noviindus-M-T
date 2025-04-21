@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Task</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+
+  <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <h2 class="text-3xl font-semibold mb-6 text-gray-800">Edit Task: {{ task.title }}</h2>
+
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="space-y-2">
+        <label for="id_title" class="text-gray-700 font-medium">Task Title</label>
+        <input type="text" name="title" id="id_title" value="{{ form.title.value }}" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <div class="space-y-2">
+        <label for="id_due_date" class="text-gray-700 font-medium">Due Date</label>
+        <input type="date" name="due_date" id="id_due_date" value="{{ form.due_date.value }}" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <div class="space-y-2">
+        <label for="id_status" class="text-gray-700 font-medium">Status</label>
+        <select name="status" id="id_status" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          {% for choice in form.status.field.choices %}
+            <option value="{{ choice.0 }}" {% if choice.0 == form.status.value %}selected{% endif %}>{{ choice.1 }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="space-y-2">
+        <label for="id_assigned_to" class="text-gray-700 font-medium">Assigned To</label>
+        <select name="assigned_to" id="id_assigned_to" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          {% for user in users %}
+            <option value="{{ user.id }}" {% if user.id == form.assigned_to.value %}selected{% endif %}>{{ user.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Update Task
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <a href="{% url 'admin-dashboard' %}" class="text-blue-600 hover:underline">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
