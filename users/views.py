@@ -25,14 +25,18 @@ class IsSuperAdmin(permissions.BasePermission):
 
 def custom_login(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        try:
+            username = request.POST["username"]
+            password = request.POST["password"]
+        except KeyError as e:
+            messages.error(request, f"Missing field: {e}")
+            return redirect('custom-login')  
+        print('username',username,'password',password)
         user = authenticate(request, username=username, password=password)
-        user = get_object_or_404(CustomUser, username=username)
+        print('user',user)
         if user is not None:
             login(request, user)
             print('user',user,'role',user.role,'is_superuser',user.is_superuser)
-            # Redirect based on role
             if user.is_superuser:
                 return redirect("superadmin-dashboard")
             elif user.role == "ADMIN":

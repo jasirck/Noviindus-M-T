@@ -7,49 +7,73 @@
 </head>
 <body class="bg-gray-100 font-sans p-6">
 
-  <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Edit Task: {{ task.title }}</h2>
 
     <form method="post" class="space-y-6">
       {% csrf_token %}
 
+      <!-- Title -->
       <div class="space-y-2">
-        <label for="id_title" class="text-gray-700 font-medium">Task Title</label>
-        <input type="text" name="title" id="id_title" value="{{ form.title.value }}" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label for="id_title" class="text-gray-700 font-medium">Title</label>
+        <input type="text" name="title" id="id_title" value="{{ form.title.value }}" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       </div>
 
+      <!-- Description -->
+      <div class="space-y-2">
+        <label for="id_description" class="text-gray-700 font-medium">Description</label>
+        <textarea name="description" id="id_description" rows="4" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">{{ form.description.value }}</textarea>
+      </div>
+
+      <!-- Assigned To -->
+      <div class="space-y-2">
+        <label for="id_assigned_to" class="text-gray-700 font-medium">Assigned To</label>
+        <select name="assigned_to" id="id_assigned_to" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          {% for user in users %}
+            <option value="{{ user.id }}" {% if user.id|stringformat:"s" == form.assigned_to.value|stringformat:"s" %}selected{% endif %}>
+              {{ user.username }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Due Date -->
       <div class="space-y-2">
         <label for="id_due_date" class="text-gray-700 font-medium">Due Date</label>
-        <input type="date" name="due_date" id="id_due_date" value="{{ form.due_date.value }}" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <input type="date" name="due_date" id="id_due_date" value="{{ form.due_date.value }}" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       </div>
 
+      <!-- Status -->
       <div class="space-y-2">
         <label for="id_status" class="text-gray-700 font-medium">Status</label>
-        <select name="status" id="id_status" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select name="status" id="id_status" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
           {% for choice in form.status.field.choices %}
             <option value="{{ choice.0 }}" {% if choice.0 == form.status.value %}selected{% endif %}>{{ choice.1 }}</option>
           {% endfor %}
         </select>
       </div>
 
+      <!-- Completion Report -->
       <div class="space-y-2">
-        <label for="id_assigned_to" class="text-gray-700 font-medium">Assigned To</label>
-        <select name="assigned_to" id="id_assigned_to" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          {% for user in users %}
-            <option value="{{ user.id }}" {% if user.id == form.assigned_to.value %}selected{% endif %}>{{ user.username }}</option>
-          {% endfor %}
-        </select>
+        <label for="id_completion_report" class="text-gray-700 font-medium">Completion Report</label>
+        <textarea name="completion_report" id="id_completion_report" rows="3" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">{{ form.completion_report.value }}</textarea>
       </div>
 
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <!-- Worked Hours -->
+      <div class="space-y-2">
+        <label for="id_worked_hours" class="text-gray-700 font-medium">Worked Hours</label>
+        <input type="number" name="worked_hours" id="id_worked_hours" value="{{ form.worked_hours.value }}" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg focus:ring-2 focus:ring-blue-500">
         Update Task
       </button>
     </form>
 
+    <!-- Back Button -->
     <div class="mt-6 text-center">
-      <a href="{% url 'admin-dashboard' %}" class="text-blue-600 hover:underline">
-        ← Back to Dashboard
-      </a>
+        <button onclick="history.back()" class="text-blue-600 hover:underline">← Back to Dashboard</button>
     </div>
   </div>
 

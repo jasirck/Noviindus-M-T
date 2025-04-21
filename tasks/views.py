@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import TaskForm
+from .forms import TaskForm, CustomUserCreationForm , EditUserForm
 
 
 
@@ -142,7 +142,22 @@ class UserTaskDetailAPIView(APIView):
 
 @login_required
 def superadmin_dashboard(request):
-    return render(request, "dashboard_superadmin.html")
+    if not request.user.is_superuser:
+        return render(request, "not_authorized.html")
+
+    status_filter = request.GET.get('status')
+    tasks = Task.objects.filter(status=status_filter) if status_filter else Task.objects.all()
+    form = TaskForm(request.POST or None)
+    
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("superadmin-dashboard")
+
+    return render(request, "dashboard_superadmin.html", {
+        "tasks": tasks,
+        "form": form,
+        "users": CustomUser.objects.all()
+    })
 
 @login_required
 def admin_dashboard(request):
@@ -175,16 +190,55 @@ def user_dashboard(request):
 
 
 @login_required
-def edit_task(request, task_id):
+def edit_task(request, task_id, from_source):
     task = get_object_or_404(Task, pk=task_id)
     form = TaskForm(request.POST or None, instance=task)
+    users = CustomUser.objects.filter(role='USER')
+    print(request.POST,'users',form.is_valid(),request.method )
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        if from_source == 'admin':
+            return redirect("admin-dashboard")
+        elif from_source == 'superadmin':
+            return redirect("superadmin-dashboard")
+        else:
+            return redirect("user-dashboard")
+
+    return render(request, "edit_task.html", {"form": form, "task": task, "users": users})
+
+@login_required
+def delete_task(request, task_id, from_source):
+    task = get_object_or_404(Task, pk=task_id)
+    task.delete()
+    if from_source == 'admin':
+        return redirect("admin-dashboard")
+    elif from_source == 'superadmin':
+        return redirect("superadmin-dashboard")
+    else:
+        return redirect("user-dashboard")
+
+
+@login_required
+def add_user(request):
+    if not request.user.is_superuser and request.user.role != 'ADMIN':
+        return render(request, "not_authorized.html")
+
+    form = CustomUserCreationForm(request.POST or None)
     if form.is_valid():
         form.save()
         return redirect("admin-dashboard")
-    return render(request, "edit_task.html", {"form": form, "task": task})
+    return render(request, "add_user.html", {"form": form})
 
 @login_required
-def delete_task(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
-    task.delete()
-    return redirect("admin-dashboard")
+def edit_user(request, user_id):
+    if not request.user.is_superuser and request.user.role != 'ADMIN':
+        return render(request, "not_authorized.html")
+
+    user = get_object_or_404(CustomUser, pk=user_id)
+    form = EditUserForm(request.POST or None, instance=user)
+
+    if form.is_valid():
+        form.save()
+        return redirect("admin-dashboard")
+
+    return render(request, "edit_user.html", {"form": form, "user": user})

@@ -18,7 +18,9 @@ urlpatterns = [
     path("dashboard/superadmin/", superadmin_dashboard, name="superadmin-dashboard"),
     path("dashboard/user/", user_dashboard, name="user-dashboard"),
     path("dashboard/admin/", admin_dashboard, name="admin-dashboard"),
-    path("tasks/<int:task_id>/edit/", edit_task, name="edit-task"),
-    path("tasks/<int:task_id>/delete/", delete_task, name="delete-task"),
+    path("tasks/<int:task_id>/<str:from_source>/edit/", edit_task, name="edit-task"),
+    path("tasks/<int:task_id>/<str:from_source>/delete/", delete_task, name="delete-task"),
+    path('admin/add-user/', views.add_user, name='add-user'),
+    path('admin/edit-user/<int:user_id>/', views.edit_user, name='edit-user'),
 
 ]

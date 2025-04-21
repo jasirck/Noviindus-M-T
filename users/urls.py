@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
 from .views import (
     custom_login,
 )
@@ -11,4 +12,5 @@ urlpatterns = [
     path('delete/<int:pk>/', views.UserDeleteView.as_view(), name='user_delete'),
     path('update/<int:pk>/', views.UserUpdateView.as_view(), name='user_update'),
     path("login/", custom_login, name="custom-login"),
+    path('logout/', LogoutView.as_view(next_page='/users/login/'), name='logout'),
 ]
