@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>User Edit Task</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-r from-blue-50 to-blue-100 font-sans p-6">
+
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-xl">
+    <h2 class="text-3xl font-semibold mb-6 text-gray-800">User Edit Task: {{ task.title }}</h2>
+
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Title (Read-only) -->
+      <div class="space-y-2">
+        <label class="text-gray-700 font-medium">Title</label>
+        <div class="w-full border border-gray-300 p-3 rounded-lg bg-gray-100 cursor-not-allowed">
+          {{ form.title.value }}
+        </div>
+      </div>
+
+      <!-- Description (Read-only) -->
+      <div class="space-y-2">
+        <label class="text-gray-700 font-medium">Description</label>
+        <div class="w-full border border-gray-300 p-3 rounded-lg bg-gray-100 cursor-not-allowed">
+          {{ form.description.value }}
+        </div>
+      </div>
+
+      <!-- Due Date (Read-only) -->
+      <div class="space-y-2">
+        <label class="text-gray-700 font-medium">Due Date</label>
+        <div class="w-full border border-gray-300 p-3 rounded-lg bg-gray-100 cursor-not-allowed">
+          {{ form.due_date.value }}
+        </div>
+      </div>
+
+      <!-- Assigned To (Read-only) -->
+      <div class="space-y-2">
+        <label class="text-gray-700 font-medium">Assigned To</label>
+        <div class="w-full border border-gray-300 p-3 rounded-lg bg-gray-100 cursor-not-allowed">
+          {{ form.assigned_to.value }}
+        </div>
+      </div>
+
+      <!-- Status (Editable Dropdown) -->
+      <div class="space-y-2">
+        <label for="id_status" class="text-gray-700 font-medium">Status</label>
+        <select id="id_status" name="status" class="w-full border border-gray-300 p-3 rounded-lg bg-white">
+          <option value="PENDING" {% if form.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
+          <option value="IN_PROGRESS" {% if form.status.value == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+          <option value="COMPLETED" {% if form.status.value == 'COMPLETED' %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+
+      <!-- Completion Report (Editable) -->
+      <div class="space-y-2">
+        <label for="id_completion_report" class="text-gray-700 font-medium">Completion Report</label>
+        <textarea class="w-full border border-gray-300 p-3 rounded-lg bg-white" name="completion_report">{{ form.completion_report.value }}</textarea>
+      </div>
+
+      <!-- Worked Hours (Editable) -->
+      <div class="space-y-2">
+        <label for="id_worked_hours" class="text-gray-700 font-medium">Worked Hours</label>
+        <input type="number" name="worked_hours" value="{{ form.worked_hours.value }}" class="w-full border border-gray-300 p-3 rounded-lg bg-white">
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        Update Task
+      </button>
+    </form>
+
+    <!-- Back Button -->
+    <div class="mt-6 text-center">
+      <button onclick="history.back()" class="text-indigo-600 hover:underline">← Back to Dashboard</button>
+    </div>
+  </div>
+
+</body>
+
+</html>

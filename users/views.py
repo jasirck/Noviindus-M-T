@@ -31,12 +31,9 @@ def custom_login(request):
         except KeyError as e:
             messages.error(request, f"Missing field: {e}")
             return redirect('custom-login')  
-        print('username',username,'password',password)
         user = authenticate(request, username=username, password=password)
-        print('user',user)
         if user is not None:
             login(request, user)
-            print('user',user,'role',user.role,'is_superuser',user.is_superuser)
             if user.is_superuser:
                 return redirect("superadmin-dashboard")
             elif user.role == "ADMIN":

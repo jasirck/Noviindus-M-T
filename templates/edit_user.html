@@ -5,70 +5,84 @@
   <title>Edit User - SuperAdmin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="font-sans bg-gray-100 p-6">
-  <div class="container mx-auto">
+<body class="font-sans bg-gray-100 p-8">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+  <!-- Container -->
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Edit User: {{ user.username }}</h1>
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow-md transition">
           Logout
         </button>
       </form>
     </div>
 
     <!-- Form to Edit User -->
-    <div class="bg-white p-6 rounded-lg shadow mb-8">
-      <h2 class="text-2xl font-semibold mb-4">Edit User Details</h2>
+    <div class="space-y-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6">Edit User Details</h2>
+      
       <form method="post" class="space-y-6">
         {% csrf_token %}
-        <div class="space-y-4">
-          <div>
-            <label for="id_username" class="block text-gray-700 font-medium">Username</label>
-            <input type="text" name="username" id="id_username" value="{{ user.username }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            {% if form.username.errors %}
-              <p class="text-red-600 text-sm">{{ form.username.errors.0 }}</p>
-            {% endif %}
-          </div>
-
-          <div>
-            <label for="id_email" class="block text-gray-700 font-medium">Email</label>
-            <input type="email" name="email" id="id_email" value="{{ user.email }}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            {% if form.email.errors %}
-              <p class="text-red-600 text-sm">{{ form.email.errors.0 }}</p>
-            {% endif %}
-          </div>
-
-          <div>
-            <label for="id_role" class="block text-gray-700 font-medium">Role</label>
-            <select name="role" id="id_role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-              <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
-              <option value="User" {% if user.role == 'User' %}selected{% endif %}>User</option>
-            </select>
-            {% if form.role.errors %}
-              <p class="text-red-600 text-sm">{{ form.role.errors.0 }}</p>
-            {% endif %}
-          </div>
-
-          <div>
-            <label for="id_is_superuser" class="inline-flex items-center">
-              <input type="checkbox" name="is_superuser" id="id_is_superuser" {% if user.is_superuser %}checked{% endif %} class="mr-2">
-              <span class="text-gray-700 font-medium">Superuser</span>
-            </label>
-            {% if form.is_superuser.errors %}
-              <p class="text-red-600 text-sm">{{ form.is_superuser.errors.0 }}</p>
-            {% endif %}
-          </div>
+        
+        <!-- Username Field -->
+        <div>
+          <label for="id_username" class="block text-gray-700 font-medium mb-2">Username</label>
+          <input type="text" name="username" id="id_username" value="{{ user.username }}" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+          {% if form.username.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.username.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
-          Save Changes
-        </button>
+        <!-- Email Field -->
+        <div>
+          <label for="id_email" class="block text-gray-700 font-medium mb-2">Email</label>
+          <input type="email" name="email" id="id_email" value="{{ user.email }}" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+          {% if form.email.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Role Selection -->
+<div>
+    <label for="id_role" class="block text-gray-700 font-medium mb-2">Role</label>
+    <select name="role" id="id_role" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+      <option value="SUPERADMIN" {% if user.role == 'SUPERADMIN' %}selected{% endif %}>Super Admin</option>
+      <option value="ADMIN" {% if user.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+      <option value="USER" {% if user.role == 'USER' %}selected{% endif %}>User</option>
+    </select>
+    {% if form.role.errors %}
+      <p class="text-red-600 text-sm mt-1">{{ form.role.errors.0 }}</p>
+    {% endif %}
+  </div>
+  
+
+        <!-- Superuser Checkbox -->
+        <div>
+          <label for="id_is_superuser" class="inline-flex items-center text-gray-700 font-medium">
+            <input type="checkbox" name="is_superuser" id="id_is_superuser" {% if user.is_superuser %}checked{% endif %} class="mr-2 rounded">
+            Superuser
+          </label>
+          {% if form.is_superuser.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.is_superuser.errors.0 }}</p>
+          {% endif %}
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between mt-6">
+          <a href="{% url 'superadmin-dashboard' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg shadow-md transition">
+            Back to Dashboard
+          </a>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition">
+            Save Changes
+          </button>
+        </div>
       </form>
     </div>
-
   </div>
+
 </body>
 </html>

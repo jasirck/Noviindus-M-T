@@ -14,9 +14,24 @@ class TaskForm(forms.ModelForm):
             'completion_report': forms.Textarea(attrs={'rows': 3}),
         }
 
+
+class UserTaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'assigned_to', 'due_date', 'status', 'completion_report', 'worked_hours']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date', 'readonly': 'readonly'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'readonly': 'readonly'}),
+            'completion_report': forms.Textarea(attrs={'rows': 3}),
+        }
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = CustomUser.objects.filter(role='USER')
+        super(UserTaskForm, self).__init__(*args, **kwargs)
+        self.fields['assigned_to'].disabled = True
+        self.fields['title'].disabled = True
+        self.fields['description'].disabled = True
+        self.fields['due_date'].disabled = True
+
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -46,8 +61,9 @@ class EditUserForm(forms.ModelForm):
             'is_superuser': 'Is Admin',
         }
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'role': forms.Select(attrs={'class': 'form-control'}),
-            'is_superuser': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'username': forms.TextInput(attrs={'class': 'w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition'}),
+            'email': forms.EmailInput(attrs={'class': 'w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition'}),
+            'role': forms.Select(choices=CustomUser.ROLE_CHOICES, attrs={'class': 'w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition'}),
+            'is_superuser': forms.CheckboxInput(attrs={'class': 'mr-2 rounded'}),
         }
+

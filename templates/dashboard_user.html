@@ -1,12 +1,49 @@
-<!-- templates/dashboard_user.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>User Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Welcome, {{ request.user.username }}!</h1>
-  <p>You can view your tasks and submit completion reports.</p>
+<body class="bg-gray-50 text-gray-900 font-sans">
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-extrabold text-gray-800">Welcome, {{ request.user.username }}!</h1>
+      <p class="text-lg text-gray-600">Your task management dashboard.</p>
+    </header>
+    
+    <!-- Logout Button -->
+    <div class="text-right mb-8">
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-600 text-white py-2 px-6 rounded-full hover:bg-red-700 transition duration-300 text-lg font-medium shadow-md">
+          Logout
+        </button>
+      </form>
+    </div>
+    
+    <!-- Tasks Section -->
+    <section>
+      <h2 class="text-3xl font-semibold text-gray-800 mb-6">Your Tasks</h2>
+      <div class="space-y-6">
+        {% for task in tasks %}
+          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 border-l-4 border-indigo-500">
+            <h3 class="text-2xl font-semibold text-gray-900">{{ task.title }}</h3>
+            <p class="text-gray-700 mt-2">{{ task.description }}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <p class="text-sm text-gray-600">Status: <span class="font-medium text-green-600">{{ task.get_status_display }}</span></p>
+              <p class="text-sm text-gray-600">Due Date: <span class="font-medium text-indigo-600">{{ task.due_date }}</span></p>
+            </div>
+            <div class="mt-6 flex justify-between items-center">
+              <a href="{% url 'user-edit-task' task.id %}" class="text-blue-600 hover:text-blue-800 font-medium transition duration-300">Edit Task</a>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-gray-600">You have no tasks assigned at the moment. Start by adding a new one.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 </body>
 </html>
